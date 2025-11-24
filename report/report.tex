@@ -1,0 +1,129 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{amsmath, amssymb, booktabs}
+\usepackage{siunitx}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{tikz}
+\usepackage{float}
+
+
+% Arial-like font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Page geometry
+\geometry{
+  a4paper,
+  left=2.5cm,
+  right=3.0cm,
+  top=2.5cm,
+  bottom=2.0cm
+}
+
+% Font and spacing
+\onehalfspacing
+\renewcommand{\familydefault}{\sfdefault}
+
+% Title page
+\begin{document}
+
+\begin{titlepage}
+\centering
+% \vspace*{2cm}
+  
+\includegraphics[width=0.7\textwidth]{imgs/USB.png}\\[1cm]
+
+\vspace{1.5cm}
+
+\textbf{\Large University of South Bohemia} \\
+\textbf{\large Faculty of Science} \\
+\large Artificial Intelligence and Data Science, M.Sc. \\[2.5cm]
+
+{\Large \textsc{Designing a Bloom Filter for a Target False Positive Rate}}\\[0.5cm]
+
+Submitted for the course \textbf{Information Theory} \\
+\textbf{Professor:} Kaštovský Jan prof. RNDr. Ph.D. \\[3cm]
+
+\begin{flushleft}
+\begin{tabular}{ll}
+Submitted by: & María Isabel Sánchez-O'Mullony Martínez \\
+Student ID: & B24763 \\
+Date: & \today \\
+\end{tabular}
+\end{flushleft}
+
+\vspace{3cm}
+
+\begin{flushright}
+\begin{tabular}{ll}
+Supervisor: & Kaštovský Jan prof. RNDr. Ph.D. \\
+\end{tabular}
+\end{flushright}
+
+\end{titlepage}
+
+
+% ===============================
+% Declaration
+% ===============================
+\section*{Declaration}
+I declare that I have written this report by myself and have only used the sources and aids mentioned, and that I have 
+marked direct and indirect citations as such. This report has not been submitted prior for any other examination.
+
+I agree that the results of this study work / report may be used free of charge for research and lecturing purposes.
+
+\newpage
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% List of Abbreviations
+\section*{List of Abbreviations}
+\begin{tabular}{ll}
+    FPR & False-Positive Rate \\
+\end{tabular}
+
+\newpage
+
+% Main Report Sections
+% ===============================
+% Introduction
+% ===============================
+\section{Introduction}\label{sec:Introduction}
+A Bloom filter is a space-efficient probabilistic data structure that that supports set membership queries, testing if
+an element is a member of a set\cite{tarkoma2011theory}. The structure offers some interesting properties: It offers
+a compact probabilistic way to represent a set that can result in false positives (claiming an element to be part of 
+the set when it is not), but never in false negatives (reporting an inserted element to be absent from the set). A
+Bloom filer of a fixed size can represent a set with an arbitrary large number of elements. Adding an element never
+fails, however, we need to take into account the increasing probability of false positive, and that deleting an 
+element from filter is not possible\cite{tarkoma2011theory, geeksforgeeks_bloom_filters}.
+
+The objective of this project is to design and implement a Bloom filter that automatically chooses the optimal size 
+(m) and number of hash functions (k) to achieve a target false-positive rate (FPR), given an expected number of 
+elements n.
+
+
+\newpage
+
+\cleardoublepage
+\addcontentsline{toc}{section}{References}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

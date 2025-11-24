@@ -1,0 +1,12 @@
+.vscode/
+
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
+report/*.;pg
+report/*.out
+report/*.synctex.gz
+report/*.toc
+report/*.log
