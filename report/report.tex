@@ -96,6 +96,7 @@ I agree that the results of this study work / report may be used free of charge 
 % List of Abbreviations
 \section*{List of Abbreviations}
 \begin{tabular}{ll}
+    BF & Bloom Filter \\
     FPR & False-Positive Rate \\
 \end{tabular}
 
@@ -106,18 +107,72 @@ I agree that the results of this study work / report may be used free of charge 
 % Introduction
 % ===============================
 \section{Introduction}\label{sec:Introduction}
-A Bloom filter is a space-efficient probabilistic data structure that that supports set membership queries, testing if
-an element is a member of a set\cite{tarkoma2011theory}. The structure offers some interesting properties: It offers
-a compact probabilistic way to represent a set that can result in false positives (claiming an element to be part of 
-the set when it is not), but never in false negatives (reporting an inserted element to be absent from the set). A
-Bloom filer of a fixed size can represent a set with an arbitrary large number of elements. Adding an element never
-fails, however, we need to take into account the increasing probability of false positive, and that deleting an 
-element from filter is not possible\cite{tarkoma2011theory, geeksforgeeks_bloom_filters}.
+A Bloom filter (BF)  is a simple, space-efficient, randomized data structure for concisely representing a static data 
+set, in order to support approximate membership queries~\cite{guo2006theory}. It is mainly a spaced optimized version 
+of hashing where we may have false positives. The idea is to not store the actual key rather store only hash values. 
+It is mainly a probabilistic and space optimized hashing where less than 10 bits per key are required for a 1\% false 
+positive probability and is not dependent on the size of individual keys~\cite{geeksforgeeks_bloom_filters}.
+
+The structure has some interesting properties: 
+It offers a compact probabilistic way to represent a set that can result in false positives (claiming an element to 
+be part of the set when it is not), but never in false negatives (reporting an inserted element to be absent from 
+the set). A Bloom filter of a fixed size can represent a set with an arbitrary large number of elements. Adding an 
+element never fails, however, we need to take into account the increasing probability of false positive
+~\cite{geeksforgeeks_bloom_filters, tarkoma2011theory}.
+
+The tradeoff is that in exchange for providing a sometimes incorrect false positive answer, a bloom filter consumes a 
+lot less memory than other data structures, like a hash table, and it is much faster. Another key point, is that is 
+not possible to remove an item from the Bloom filter.
 
 The objective of this project is to design and implement a Bloom filter that automatically chooses the optimal size 
-(m) and number of hash functions (k) to achieve a target false-positive rate (FPR), given an expected number of 
-elements n.
+($m$) and number of hash functions ($k$) to achieve a target false-positive rate (FPR) ($p$), given an expected number 
+of elements ($n$).
 
+
+% ===============================
+% Algorithm Description
+% ===============================
+\section{Algorithm Description}\label{sec:Algorithm}
+Bloom Filter has two oeprations, insert data and key lookup. It uses a bit array and hashing techniques to store the 
+existence of a string. 
+
+A BF for representing a set $S = \{x_1, \ldots, x_n\}$ of $n$ items is described by a vector of $m$ bits, initially 
+all set to 0. The key idea is to use k hash functions, $h_i(x),1 \leq i \leq k$ to map items $x \in S$ to random 
+numbers uniform in the range $1, \ldots, m$, where the hash functions are assumed to be uniform~\cite{tarkoma2011theory}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{imgs/overview.png}
+    \caption{Overview of a Bloom Filter~\cite{tarkoma2011theory}.}\label{fig:overview}
+\end{figure}
+
+To insert data in the BF, we first need a big bit array initialized to 0 and multiple hash functions which will take
+the data and convert it into a unique number that points to a specific switch in the array. When we add the new item
+into the filter we feed its name thorugh the hash functions and each function points to a switch in the array, turning
+the switches to 1~\cite{yt2024bloom}.
+
+To search for an item, the hash function is used again, checking if the corresponding switches in the array are 1. If 
+there is even one that is 0, then the item id for sure not part of the set. However, there is the possibility that even
+though all the switches are 1, the item might not be part of the set, this is a false positive.
+
+
+% ===============================
+% Implementation
+% ===============================
+\section{Implementation}\label{sec:Implementation}
+The implementation was written in Python.
+
+To design a Bloom filter for a specific FPR, you primarily compute m and k using the formulas above based on your 
+expected n and target p. Properly tuning these parameters ensures your Bloom filter maintains your desired false 
+positive rate.
+
+1. Use the calculated m and k parameters.
+
+2. Select hash functions that are independent and distribute uniformly over the bit array.
+
+3. Be aware that increasing m (more bits) reduces FPR but increases memory consumption.
+
+4. Adjust parameters if your element estimate n or FPR requirement changes.
 
 \newpage
 
