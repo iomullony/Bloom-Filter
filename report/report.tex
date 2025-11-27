@@ -133,12 +133,14 @@ of elements ($n$).
 % Algorithm Description
 % ===============================
 \section{Algorithm Description}\label{sec:Algorithm}
-Bloom Filter has two oeprations, insert data and key lookup. It uses a bit array and hashing techniques to store the 
-existence of a string. 
 
-A BF for representing a set $S = \{x_1, \ldots, x_n\}$ of $n$ items is described by a vector of $m$ bits, initially 
-all set to 0. The key idea is to use k hash functions, $h_i(x),1 \leq i \leq k$ to map items $x \in S$ to random 
-numbers uniform in the range $1, \ldots, m$, where the hash functions are assumed to be uniform~\cite{tarkoma2011theory}.
+A Bloom Filter supports two primary operations: inserting an element and querying whether an element is in a set. It 
+provides space-efficient membership testing at the cost of allowing false positives.
+
+A Bloom Filter representing a set $S = \{x_1, \ldots, x_n\}$ of $n$ items is implemented using a bit array of length 
+$m$, with all bits initially set to 0. The filter relies on $k$ independent hash functions $h_i(x)$, where $1 \leq i 
+\leq k$, each mapping an element $x \in S$ uniformly to one of the positions in the range $\{1, \ldots, m\}$
+~\cite{tarkoma2011theory}.
 
 \begin{figure}[H]
     \centering
@@ -146,14 +148,17 @@ numbers uniform in the range $1, \ldots, m$, where the hash functions are assume
     \caption{Overview of a Bloom Filter~\cite{tarkoma2011theory}.}\label{fig:overview}
 \end{figure}
 
-To insert data in the BF, we first need a big bit array initialized to 0 and multiple hash functions which will take
-the data and convert it into a unique number that points to a specific switch in the array. When we add the new item
-into the filter we feed its name thorugh the hash functions and each function points to a switch in the array, turning
-the switches to 1~\cite{yt2024bloom}.
+\subsection{Insertion}
+To insert an element $x$ into the BF, we start out empty with all bits set to 0, then we calculate all $k$ hash 
+functions. Each hash function outputs an index in the bit array, and the corresponding bit is set to 1. If a bit 
+is already 1, it remains unchanged. After processing all $k$ hash outputs, the Bloom Filter reflects the presence of 
+$x$ probabilistically~\cite{tarkoma2011theory, yt2024bloom}.
 
-To search for an item, the hash function is used again, checking if the corresponding switches in the array are 1. If 
-there is even one that is 0, then the item id for sure not part of the set. However, there is the possibility that even
-though all the switches are 1, the item might not be part of the set, this is a false positive.
+\subsection{Lookup}
+To check whether an element $y$ is in the set, we again use the same $k$ hash functions for $y$. If any of the 
+corresponding bits in the array is 0, then $y$ is guaranteed not to be in the set. If all $k$ bits are 1, the Bloom 
+Filter reports that $y$ may be in the set. In this case, the answer is possibly correct, but false positives can occur 
+because the bits may have been set by other elements~\cite{tarkoma2011theory}.
 
 
 % ===============================
