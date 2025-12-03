@@ -21,7 +21,23 @@
 \usepackage{rotating}
 \usepackage{tikz}
 \usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
 
+% To show the code
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{gray}\itshape,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
 
 % Arial-like font
 \renewcommand{\familydefault}{\sfdefault}
@@ -44,20 +60,19 @@
 
 \begin{titlepage}
 \centering
-% \vspace*{2cm}
   
-\includegraphics[width=0.7\textwidth]{imgs/USB.png}\\[1cm]
+\includegraphics[width=0.7\textwidth]{imgs/USB.png}\\[2cm]
 
 \vspace{1.5cm}
 
 \textbf{\Large University of South Bohemia} \\
 \textbf{\large Faculty of Science} \\
-\large Artificial Intelligence and Data Science, M.Sc. \\[2.5cm]
+\large Artificial Intelligence and Data Science, M.Sc. \\[3cm]
 
-{\Large \textsc{Designing a Bloom Filter for a Target False Positive Rate}}\\[0.5cm]
+{\Large \textsf{Designing a Bloom Filter for a Target False Positive Rate}}\\[0.5cm]
 
 Submitted for the course \textbf{Information Theory} \\
-\textbf{Professor:} Kaštovský Jan prof. RNDr. Ph.D. \\[3cm]
+\textbf{Professor:} Kaštovský Jan prof. RNDr. Ph.D. \\[4cm]
 
 \begin{flushleft}
 \begin{tabular}{ll}
@@ -67,7 +82,7 @@ Date: & \today \\
 \end{tabular}
 \end{flushleft}
 
-\vspace{3cm}
+\vspace{4cm}
 
 \begin{flushright}
 \begin{tabular}{ll}
@@ -89,44 +104,52 @@ I agree that the results of this study work / report may be used free of charge 
 
 \newpage
 
+
+% ===============================
 % Table of Contents
+% ===============================
 \tableofcontents
+
 \newpage
 
+
+% ===============================
 % List of Abbreviations
-\section*{List of Abbreviations}
-\begin{tabular}{ll}
-    BF & Bloom Filter \\
-    FPR & False-Positive Rate \\
-\end{tabular}
+% ===============================
+% \section*{List of Abbreviations}
+% \begin{tabular}{ll}
+%     BF & Bloom Filter \\
+%     FPR & False-Positive Rate \\
+% \end{tabular}
 
-\newpage
+% \newpage
 
-% Main Report Sections
+
 % ===============================
 % Introduction
 % ===============================
 \section{Introduction}\label{sec:Introduction}
-A Bloom filter (BF)  is a simple, space-efficient, randomized data structure for concisely representing a static data 
-set, in order to support approximate membership queries~\cite{guo2006theory}. It is mainly a spaced optimized version 
-of hashing where we may have false positives. The idea is to not store the actual key rather store only hash values. 
-It is mainly a probabilistic and space optimized hashing where less than 10 bits per key are required for a 1\% false 
-positive probability and is not dependent on the size of individual keys~\cite{geeksforgeeks_bloom_filters}.
+A Bloom Filter (BF) is a simple, space-efficient, randomized data structure for representing a set in order to support 
+approximate membership queries~\cite{guo2006theory}. Instead of storing the actual elements, the filter stores only the 
+values of multiple hash functions, enabling significant memory savings. Because of this design, Bloom Filters can 
+represent keys with only a small number of bits per element, and their space usage does not depend on the size of the 
+individual keys~\cite{geeksforgeeks_bloom_filters}.
 
-The structure has some interesting properties: 
-It offers a compact probabilistic way to represent a set that can result in false positives (claiming an element to 
-be part of the set when it is not), but never in false negatives (reporting an inserted element to be absent from 
-the set). A Bloom filter of a fixed size can represent a set with an arbitrary large number of elements. Adding an 
-element never fails, however, we need to take into account the increasing probability of false positive
-~\cite{geeksforgeeks_bloom_filters, tarkoma2011theory}.
+Bloom Filters offers several interesting properties. They provide a compact and probabilistic representation of a set 
+that may reasult in false positives, claiming an element to be part of the set when it is not, but never false negatives, 
+reporting an inserted element to be absent from the set any inserted element is always reported as present. A fixed-size 
+Bloom Filter can, in principle, support insertion of an arbitrarily large number of elements; however, each insertion 
+increases the probability of false positives~\cite{geeksforgeeks_bloom_filters, tarkoma2011theory}. Insertions never 
+fail, but the accuracy of the filter degrades as it becomes saturated.
 
-The tradeoff is that in exchange for providing a sometimes incorrect false positive answer, a bloom filter consumes a 
-lot less memory than other data structures, like a hash table, and it is much faster. Another key point, is that is 
-not possible to remove an item from the Bloom filter.
+The key trade-off is that in exchange for the possibility of returning false positives, Bloom Filters achieve large
+memory savings and fast operations compared to traditional data structures such as hash tables~\cite{yt2024bloom}. 
+Another key point, is that a BF does not support deletion of elemenets once inserted, because clearing bits may revome 
+information about other elements.
 
-The objective of this project is to design and implement a Bloom filter that automatically chooses the optimal size 
-($m$) and number of hash functions ($k$) to achieve a target false-positive rate (FPR) ($p$), given an expected number 
-of elements ($n$).
+The objective of this project is to design and implement a Bloom Filter that automatically selects the optimal bit-array 
+size ($m$) and number of hash functions ($k$) required to achieve a target false-positive rate (FPR) ($p$), given an 
+expected number of inserted elements ($n$).
 
 
 % ===============================
@@ -134,8 +157,8 @@ of elements ($n$).
 % ===============================
 \section{Algorithm Description}\label{sec:Algorithm}
 
-A Bloom Filter supports two primary operations: inserting an element and querying whether an element is in a set. It 
-provides space-efficient membership testing at the cost of allowing false positives.
+A Bloom Filter supports two primary operations: inserting an element and querying whether an element is in a set or not. 
+It provides space-efficient membership testing at the cost of allowing false positives.
 
 A Bloom Filter representing a set $S = \{x_1, \ldots, x_n\}$ of $n$ items is implemented using a bit array of length 
 $m$, with all bits initially set to 0. The filter relies on $k$ independent hash functions $h_i(x)$, where $1 \leq i 
@@ -148,13 +171,13 @@ $m$, with all bits initially set to 0. The filter relies on $k$ independent hash
     \caption{Overview of a Bloom Filter~\cite{tarkoma2011theory}.}\label{fig:overview}
 \end{figure}
 
-\subsection{Insertion}
+\subsection{Insertion}\label{subsec:Insertion}
 To insert an element $x$ into the BF, we start out empty with all bits set to 0, then we calculate all $k$ hash 
 functions. Each hash function outputs an index in the bit array, and the corresponding bit is set to 1. If a bit 
 is already 1, it remains unchanged. After processing all $k$ hash outputs, the Bloom Filter reflects the presence of 
 $x$ probabilistically~\cite{tarkoma2011theory, yt2024bloom}.
 
-\subsection{Lookup}
+\subsection{Lookup}\label{subsec:Lookup}
 To check whether an element $y$ is in the set, we again use the same $k$ hash functions for $y$. If any of the 
 corresponding bits in the array is 0, then $y$ is guaranteed not to be in the set. If all $k$ bits are 1, the Bloom 
 Filter reports that $y$ may be in the set. In this case, the answer is possibly correct, but false positives can occur 
@@ -165,19 +188,151 @@ because the bits may have been set by other elements~\cite{tarkoma2011theory}.
 % Implementation
 % ===============================
 \section{Implementation}\label{sec:Implementation}
-The implementation was written in Python.
+This implementation was written in Python. It consists of three main parts: parameter selection, hashing and the core 
+operations, insertion and lookup.
 
-To design a Bloom filter for a specific FPR, you primarily compute m and k using the formulas above based on your 
-expected n and target p. Properly tuning these parameters ensures your Bloom filter maintains your desired false 
-positive rate.
 
-1. Use the calculated m and k parameters.
+\subsection{Parameter Selection}\label{subsec:Parameters}
+To achieve the desired false-positive probability, the implementation computes the BF parameters using the standard
+optimal formulas. The optimal number of hash functions can be computed by the forumla:
 
-2. Select hash functions that are independent and distribute uniformly over the bit array.
+\[
+k = \frac{m}{n} \ln 2,
+\]
 
-3. Be aware that increasing m (more bits) reduces FPR but increases memory consumption.
+where $k$ is the optimal number of has functions, $n$ is the estimated number of inserted objects and $m$ is the bit-
+array size. $m$ can also be calculated for an expected number of elemenets $n$ with a desired false positive probability 
+$p$:
 
-4. Adjust parameters if your element estimate n or FPR requirement changes.
+\[
+m = -\frac{n \ln p}{(\ln 2)^2},
+\]
+
+The values of $m$ and $k$ are rounded to the nearest integers, with the constraint that $k \geq 1$. The computation is 
+performed at initialization time to ensure that the filter is configured appropriately before any elements are inserted.
+
+A bit array with size $m$ is then created and initialized to zero. The library \texttt{bitarray}~\cite{bitarray} was 
+used to make it easier, helping with simplicity but at the same time allowing high performance.
+
+
+\subsection{Hash Functions}\label{subsec:Hash}
+According to A. Kirsch and M. Mitzenmacher~\cite{kirsch2006less}, rather than implementing $k$ independent hash functions
+from scratch, only two hash functions, $h_1(x)$ and $h_2(x)$, are enough in Bloom Filters, without increasing the false 
+positive probability and simplifying the implementation. Therefore, we can use the following standard double-hashing 
+technique:
+
+\[
+h_i(x) = (h_1(x) + i \cdot h_2(x)) \bmod m, \quad i = 0, \ldots, k-1
+\]
+
+To choose which hash functions to use we need to take into account that they should be independent hash functions, the 
+values should be uniformly distributed and efficient/fast. In my case, I chose to use MD4 and SHA256, designed for 
+security and good distribution, they are also slower, but their randomness make them difficult to predict and secure.
+
+For this implementation, the performance is not critical, but if it was, we could change these hash functions for 
+non-cryptographyc, faster hash functions like MurmurHash or xxHash.
+
+It is crucial that $h_2$ is not zero for any item to avoid conflicts with the modulus operation, the reason is that 
+adding zero repeatedly won't produce distinct values. If and item in $h_2$ is zero, the generated indexes will be the 
+same across iterations.
+
+
+\subsection{Insertion Function}\label{subsec:Insertion_func}
+Once we have the parameters and the base has functions, we can define the operations for insertion and lookup. Following 
+the theory in section~\ref{subsec:Insertion}, to insert an element $x$ in the BF, we can calculate $k$ indexes or hash 
+locations with the double hash function, then set each corresponding bit in the bit-array to 1.
+
+It is not required to check wether a bit is already set or not. There is no possibility of insertion failure because bits 
+may be set multiple times without conflict.
+
+
+\subsection{Lookup Function}\label{subsec:Lookup_func}
+According to section~\ref{subsec:Lookup}, to test if an element $y$ may belong to the set, the same $k$ hash locations 
+are computed. For each index generated by the double hashing, we check if the bit at the bit-array is set to 1. If all 
+the bits are 1, the item is possibly in the set, but if any bit is 0, then we know that it definitely does not belong 
+to the set.
+
+
+% ===============================
+% Code Structure
+% ===============================
+\section{Code Structure}\label{sec:Code}
+The implementation consists on two files, \verb|bloom_filter.py| and \verb|run_experiment.py| (the whole code can be 
+found in the appendix). The first one with all the logic for the Bloom Filter and the second one for testing the outputs 
+of different given values.
+
+The code was done by creating a specific class for the Bloom Filter, its parameters are based on the values $n$
+and $p$ provided by the user. Then the other required parameters are calculated with these values ($m$ and $k$) and a 
+bit-array with size $m$ is initialized to 0 as mentioned in section~\ref{subsec:Parameters}.
+
+This class contains two functions, \texttt{insert(element)} and \texttt{lookup(element)}, which do exactly what their 
+names say, insert an element into the filter and test whether the filter might contain the element as expalined in 
+sections~\ref{subsec:Insertion_func} and~\ref{subsec:Lookup_func}.
+
+
+\subsection{Testing}\label{subsec:Testing}
+We are testing two target values for the False Positive Rate, 1\% and 0.1\%. The testing is implemented in the file 
+\path{run_experiment.py} (check listing \ref{lst:Experiments}). In both cases, $n = 10000$ is used, any other number 
+could have been chosen. 
+
+For both experiments $n$ elememts were inserted into the BF, each item is a string formed by concatenating ``element'' 
+with an index (e.g., ``element\_0'', ``element\_1'', $\dots$). The specific string format does not matter — it could be 
+any unique string. 
+
+Once the elements are inserted, we can estimate the actual FPR of the Bloom Filter to check if it aligns with the 
+theoretical calculations.
+
+To perform this estimation, a function \verb|estimate_fpr(bf, trials)| was defined, which takes the Bloom filter to 
+test and the number of trials. In our experiments, we used 20,000 trials.
+
+The function works by generating random strings of length 10, consisting of random letters. These strings are very 
+unlikely to be the same as any of the inserted elements before. Each string is then checked with the Bloom filter. 
+
+A false positive occurs when the BF indicates that a random string is present, even though it was never inserted. Since 
+the random string generated are very unlikely to match, if we get any positive is most likely to be a false positive.
+This procedure allows us to empirically measure the Bloom filter's false positive rate and compare it with theoretical 
+expectations. The empirical FPR is computed with the following formula:
+
+\[
+\hat{p} = \frac{\text{number of false positives}}{\text{total tested}}
+\]
+
+Note that here the total tested should be equal to the number of trials we specified.
+
+
+% ===============================
+% Results
+% ===============================
+\section{Results}\label{sec:Results}
+As mentioned in section~\ref{subsec:Testing}, experiments were performed for two target false positive rates: 1\% and 
+0.1\%. In each case, we inserted $n = 10000$ elements into the Bloom Filter and measured the FPR using 20000 random 
+trials. These were the results we got after running the program:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{imgs/results.png}
+    \caption{Comparison of theoretical and observed false positive rates.}\label{fig:results}
+\end{figure}
+
+The observed FPR values are very close to the target rates, showing that the Bloom filter is behaving as expected. The 
+results are not exactly the same as the target rates, this was expected due to the random sampling.
+
+\newpage
+
+% ===============================
+% Appendix
+% ===============================
+\appendix
+\section{Bloom Filter}\label{sec:Bloom_Filter}
+The following is the complete code used for the Bloom filter experiments.
+
+\lstinputlisting[caption={Complete code for Bloom filter experiments}, label={lst:Bloom_Filter}]{../bloom_filter.py}
+
+\section{Experiments}\label{sec:Experiments}
+The following is the complete code used of how to run the experiments.
+
+\lstinputlisting[caption={Complete code for running the experiments}, label={lst:Experiments}]{../run_experiment.py}
+
 
 \newpage
 
